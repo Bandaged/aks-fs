@@ -32,5 +32,3 @@ output accountNameSecretId string = name.id
 
 output accountKeySecretName string = key.name
 output accountKeySecretId string = key.id
-
-output accountName string = sa.name

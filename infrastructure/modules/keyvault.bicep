@@ -23,5 +23,6 @@ resource kv 'Microsoft.KeyVault/vaults@2023-02-01' ={
   }
 }
 
-output keyVaultId string = kv.id
-output keyVaultName string = kv.name
+output id string = kv.id
+output name string = kv.name
+output tenantId string = kv.properties.tenantId

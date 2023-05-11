@@ -60,7 +60,7 @@ module vault 'modules/keyvault.bicep' ={
 module secrets 'modules/secret.bicep' ={
   name: 'secrets'
   params: {
-    kvName: vault.outputs.keyVaultName
+    kvName: vault.outputs.name
     saName: storage.outputs.saName
   }
   dependsOn:[
@@ -72,7 +72,7 @@ module secrets 'modules/secret.bicep' ={
 module rbac 'modules/rbac.bicep'={
   name: 'rbac'
   params:{
-    kvName: vault.outputs.keyVaultName
+    kvName: vault.outputs.name
     saName: storage.outputs.saName
     shareName: storage.outputs.shareName
     podIdentityId:podIdentity.outputs.resourceId
@@ -88,15 +88,14 @@ module rbac 'modules/rbac.bicep'={
 
 output fileshare object ={
   shareName: storage.outputs.shareName
-  accountName: secrets.outputs.accountName
+  accountName: storage.outputs.saName
   keyVault:{
-    vaultName: vault.outputs.keyVaultName
-    tenantId: tenantId
+    vaultName: vault.outputs.name
+    tenantId: vault.outputs.tenantId
     accountName: secrets.outputs.accountNameSecretName
     accountKey: secrets.outputs.accountKeySecretName
   }
 }
-
 
 output podIdentity object = {
   id: podIdentity.outputs.resourceId
