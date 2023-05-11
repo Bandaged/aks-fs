@@ -1,5 +1,7 @@
 version: '3.9'
 services:
   cli:
+    volumes:
+      - ./:/data
     image: mcr.microsoft.com/azure-cli
   
