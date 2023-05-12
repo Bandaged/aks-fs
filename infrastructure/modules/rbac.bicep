@@ -3,6 +3,7 @@ param msiId string
 param kvName string
 param saName string
 param shareName string
+param principalType string = 'ServicePrincipal'
 
 var kvUserRoleId ='4633458b-17de-408a-b874-0445c86b69e6'
 
@@ -35,7 +36,7 @@ resource keyVaultRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04
   scope: kv
   properties:{
     principalId: msiId
-    principalType: 'ServicePrincipal'
+    principalType: principalType
     roleDefinitionId: keyVaultRole.id
   }
 }
@@ -44,7 +45,7 @@ resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   scope: sa
   properties:{
     principalId: msiId
-    principalType: 'ServicePrincipal'
+    principalType: principalType
     roleDefinitionId: fileShareRole.id
   }
 }

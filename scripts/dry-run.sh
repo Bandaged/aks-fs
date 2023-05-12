@@ -1,4 +1,6 @@
-
+#!/bin/bash
+rgName=$1
+rgName=${rgName:="test"}
 mkdir ../build
 
 cat <<EOF > ../build/values.test.yaml

@@ -14,6 +14,8 @@ resource kv 'Microsoft.KeyVault/vaults@2023-02-01' = if(deploy){
   properties:{
     enableSoftDelete: enableSoftDelete
     enableRbacAuthorization: true
+    enabledForDeployment: true
+    enabledForTemplateDeployment: true
     softDeleteRetentionInDays: softDeleteRetentionInDays
     sku: {
       family: skufamily
@@ -33,5 +35,5 @@ resource existingKv  'Microsoft.KeyVault/vaults@2023-02-01' existing = if(!deplo
 }
 
 output id string = deploy ? kv.id : existingKv.id
-output name string = deploy ? kv.name :existingKv.name
+output name string = deploy ? kv.name : existingKv.name
 output tenantId string = deploy ? kv.properties.tenantId : existingKv.properties.tenantId

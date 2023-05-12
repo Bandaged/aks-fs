@@ -8,6 +8,9 @@ param deployCluster bool =true
 param deployKeyVault bool = true
 param deployIdentity bool =true
 param deployStorage bool =true
+param deployUserRbac bool = true
+param currentUserId string = ''
+param currentUserPrincipalType string = 'User'
 
 module podIdentity 'modules/identity.bicep' ={
   name: 'identity'
@@ -91,6 +94,16 @@ module clusterRbac 'modules/rbac.bicep'= if(deployCluster){
   ]
 }
 
+module currentUserRbac 'modules/rbac.bicep' = if(length(currentUserId) > 0 && deployUserRbac){
+  name: 'user-rbac'
+  params:{
+    kvName: vault.outputs.name
+    saName: storage.outputs.saName
+    shareName: storage.outputs.shareName
+    msiId: currentUserId
+    principalType: currentUserPrincipalType
+  }
+}
 
 output clusterId string = deployCluster ? cluster.outputs.aksName : ''
 output clusterMsiId string = deployCluster ? cluster.outputs.msiId : ''

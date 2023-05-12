@@ -1,5 +1,6 @@
 #!/bin/bash
-rgName=${1:="test"}
+rgName=$1
+rgName=${rgName:-"test"}
 
 echo "Resource group $rgName"
 # delete resouce group
