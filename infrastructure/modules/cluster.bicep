@@ -19,8 +19,9 @@ param agentCount int = 3
 @description('The size of the Virtual Machine.')
 param agentVMSize string = 'standard_d2s_v3'
 
+param deploy bool = true
 
-resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = {
+resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = if(deploy) {
   name: clusterName
   location: location
   identity: {
@@ -56,7 +57,10 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = {
   }
 }
 
+resource existingCluster 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' existing = if(!deploy) {
+  name: clusterName
+}
 
-output aksName string = aks.name
-output aksId string = aks.id
-output msiId string = aks.identity.principalId
+output aksName string = deploy ? aks.name : existingCluster.name
+output aksId string = deploy ?  aks.id : existingCluster.id
+output msiId string = deploy ? aks.identity.principalId : existingCluster.identity.principalId
