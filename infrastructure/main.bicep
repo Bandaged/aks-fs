@@ -4,16 +4,17 @@ param clusterName string
 param podIdentityMsiName string
 param location string = resourceGroup().location
 param tenantId string = tenant().tenantId
-param podIdentityNamespace string ='default'
-param podIdentityName string ='default'
-param podIdentitySelector string = 'default'
 param deployCluster bool =true
+param deployKeyVault bool = true
+param deployIdentity bool =true
+param deployStorage bool =true
 
 module podIdentity 'modules/identity.bicep' ={
   name: 'identity'
   params:{
     msiName: podIdentityMsiName
     location: location
+    deploy: deployIdentity
   }
 }
 
@@ -22,18 +23,6 @@ module cluster 'modules/cluster.bicep' = if(deployCluster) {
   params:{
     clusterName: clusterName
     location: location
-    podIdentities: [
-      {
-        bindingSelector: podIdentitySelector
-        identity:{
-          clientId: podIdentity.outputs.clientId
-          objectId: podIdentity.outputs.objectId
-          resourceId: podIdentity.outputs.resourceId
-        }
-        name: podIdentityName
-        namespace: podIdentityNamespace
-      }
-    ]
   }
   dependsOn:[
     podIdentity
@@ -45,6 +34,7 @@ module storage 'modules/storage.bicep' ={
   params:{
      saName: saName
      location: location
+     deploy: deployStorage
   }
 }
 
@@ -54,6 +44,7 @@ module vault 'modules/keyvault.bicep' ={
     kvName: kvName
     location: location
     tenantId: tenantId
+    deploy: deployKeyVault
   }
 }
 
@@ -76,7 +67,7 @@ module podIdRbac 'modules/rbac.bicep'={
     kvName: vault.outputs.name
     saName: storage.outputs.saName
     shareName: storage.outputs.shareName
-    msiId:podIdentity.outputs.resourceId
+    msiId: podIdentity.outputs.objectId
   }
   dependsOn:[
     vault

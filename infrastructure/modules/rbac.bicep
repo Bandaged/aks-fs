@@ -31,7 +31,7 @@ resource fileShareRole  'Microsoft.Authorization/roleDefinitions@2022-04-01' exi
 }
 
 resource keyVaultRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01'={
-  name: guid(kv.id, msiId, keyVaultRole.id)
+  name: guid(kvName, msiId, kvUserRoleId)
   scope: kv
   properties:{
     principalId: msiId
@@ -40,8 +40,8 @@ resource keyVaultRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04
   }
 }
 resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01'={
-  name: guid(kv.id, msiId, keyVaultRole.id)
-  scope: sa::fileServices::share
+  name: guid(saName, msiId, fsRoleId)
+  scope: sa
   properties:{
     principalId: msiId
     principalType: 'ServicePrincipal'
@@ -49,4 +49,9 @@ resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-
   }
 }
 
+
+output kvRoleId string = keyVaultRoleAssignment.id
+output kvRoleName string = keyVaultRoleAssignment.name
+output saRoleId string = storageRoleAssignment.id
+output saRoleName string = storageRoleAssignment.name
 

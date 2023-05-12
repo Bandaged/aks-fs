@@ -1,10 +1,16 @@
+#!/bin/bash
+rgName=${1:="test"}
+deploymentName=${2:="test"}
+location=${3:="uksouth"}
 
-local rgName=${1:-test}
-local deploymentName=${2:-test}
+echo "Resource group $rgName"
+echo "Location $location"
+echo "Deployment group $deploymentName"
 
 mkdir ../build
+az group create -n ${rgName} --l ${location}
 # setup infrastructure
-az bicep build -f ../infrastructure/main.bicep --outfile ../build/main.json
+az bicep build -f ../infrastructure/main.bicep --outfile ../build/main.json || exit 1
 az deployment group validate -g ${rgName} --template-file ../build/main.json -p ../infrastructure/main.parameters.json || exit 1
 az deployment group create -g ${rgName} -n ${deploymentName} --template-file ../build/main.json -p ../infrastructure/main.parameters.json  || exit 1
 

@@ -5,24 +5,26 @@ param tenantId string = tenant().tenantId
 param skuName string = 'standard'
 param skufamily string = 'A'
 param enableSoftDelete bool = false
-param softDeleteRetentionInDays int = 0
+param softDeleteRetentionInDays int = 7
 param deploy bool =true
-param properties object ={
-  enableSoftDelete: false
-  softDeleteRetentionInDays: 0
-}
 
 resource kv 'Microsoft.KeyVault/vaults@2023-02-01' = if(deploy){
   name: kvName
   location: location
   properties:{
     enableSoftDelete: enableSoftDelete
+    enableRbacAuthorization: true
     softDeleteRetentionInDays: softDeleteRetentionInDays
     sku: {
       family: skufamily
       name: skuName
     }
     tenantId: tenantId
+    networkAcls: {
+      defaultAction: 'Allow'
+      bypass: 'AzureServices'
+    }
+    accessPolicies:[]
   }
 }
 

@@ -2,9 +2,8 @@
 param clusterName string
 param location string = resourceGroup().location
 
-param podIdentities array
 @description('Optional DNS prefix to use with hosted Kubernetes API server FQDN.')
-param dnsPrefix string =''
+param dnsPrefix string ='aks'
 
 @description('Disk size (in GB) to provision for each of the agent pool nodes. This value ranges from 0 to 1023. Specifying 0 will apply the default disk size for that agentVMSize.')
 @minValue(0)
@@ -32,7 +31,9 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = i
     dnsPrefix: dnsPrefix
     podIdentityProfile:{
       enabled: !useWorkloadIdentity
-      userAssignedIdentities: podIdentities
+    }
+    networkProfile:{
+      networkPlugin:'azure'
     }
     agentPoolProfiles: [
       {
@@ -68,5 +69,6 @@ resource existingCluster 'Microsoft.ContainerService/managedClusters@2022-05-02-
 }
 
 output aksName string = deploy ? aks.name : existingCluster.name
-output aksId string = deploy ?  aks.id : existingCluster.id
+output aksId string = deploy ? aks.id : existingCluster.id
+output msiTenantId string = deploy ? aks.identity.tenantId : existingCluster.identity.tenantId
 output msiId string = deploy ? aks.identity.principalId : existingCluster.identity.principalId

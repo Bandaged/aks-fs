@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "saName": {
-      "value": "testaddis001"
+      "value": "testsaaddis001"
     },
     "kvName": {
-      "value": "testaddis001"
+      "value": "testkvaddis001"
     },
     "clusterName": {
-      "value": "testaddis001"
+      "value": "testaksaddis001"
     },
     "podIdentityMsiName": {
-      "value": "testaddis001"
+      "value": "testmsiaddis001"
     }
   }
 }
