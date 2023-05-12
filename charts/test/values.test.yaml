@@ -1,0 +1,16 @@
+keyVault:
+  vaultName: test-vault-name-3123
+  accountName: test-sa-name
+  accountKey: test-sa-key
+  tenantId: test
+fileshare:
+  shareName: testshare2123
+  accountName: testaccount312312
+  accountKey: test-eqwe123123123
+podIdentity:
+  name: testuser
+  resourceId: test
+  clientId: test
+  selector: test
+  tenantId: test
+  workloadIdentity: false
