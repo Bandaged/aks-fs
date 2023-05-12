@@ -1,0 +1,10 @@
+{{- if not .Values.podIdentity.workloadIdentity }}
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+  name: {{.Values.podIdentity.name | quote}}
+spec:
+  type: 0
+  resourceID: {{.Values.podIdentity.resourceId}}
+  clientID: {{.Values.podIdentity.clientId}}
+{{-end}}

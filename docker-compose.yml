@@ -2,6 +2,8 @@ version: '3.9'
 services:
   cli:
     volumes:
+      - ${HOME}/.ssh:/root/.ssh
+      - ${HOME}/.azure:/root/.azure
       - ./:/data
     image: mcr.microsoft.com/azure-cli
   

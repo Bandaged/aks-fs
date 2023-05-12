@@ -23,15 +23,17 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+keyVault:
+  accountKey: ""
+  accountName: ""
+  vaultName: ""
+  tenantId: ""
+  
 fileshare:
-  podIdenityName: ''
+  podIdenityName: ""
   shareName: ""
   accountKey: ""
   accountName: ""
-  keyVault:
-    accountKey: ""
-    accountName: ""
-    vaultName: ""
   vanillaSecretName: fileshare-auth-vanilla
   vmSecretName: fileshare-auth-vm
   podIdSecretName: fileshare-auth-pod-id
@@ -39,6 +41,11 @@ fileshare:
 podIdentity:
   selector: ""
   name: ""
+  resourceId: ""
+  objectId: ""
+  clientId: ""
+  tenantId: ""
+  workloadIdentity: false
 
 podAnnotations: {}
 

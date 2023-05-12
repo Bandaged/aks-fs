@@ -1,14 +1,8 @@
-param podIdentityId string
-param clusterMsiId string
+param msiId string
 
 param kvName string
 param saName string
 param shareName string
-
-param clusterKeyVaultRoleName string ='aks-kv-access'
-param podIdentityKeyVaultRoleName string ='pod-id-kv-access'
-param clusterStorageRoleName string ='aks-sa-access'
-param podIdentityStorageRoleName string ='pod-id-sa-access'
 
 var kvUserRoleId ='4633458b-17de-408a-b874-0445c86b69e6'
 
@@ -36,40 +30,20 @@ resource fileShareRole  'Microsoft.Authorization/roleDefinitions@2022-04-01' exi
   name: fsRoleId
 }
 
-resource clusterKeyVaultRoles 'Microsoft.Authorization/roleAssignments@2022-04-01'={
-  name: clusterKeyVaultRoleName
+resource keyVaultRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01'={
+  name: guid(kv.id, msiId, keyVaultRole.id)
   scope: kv
   properties:{
-    principalId: clusterMsiId
+    principalId: msiId
     principalType: 'ServicePrincipal'
     roleDefinitionId: keyVaultRole.id
   }
 }
-resource podIdentityKeyVaultRoles 'Microsoft.Authorization/roleAssignments@2022-04-01'={
-  name: podIdentityKeyVaultRoleName
-  scope: kv
-  properties:{
-    principalId: podIdentityId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: keyVaultRole.id
-  }
-}
-
-resource clusterStorageRoles 'Microsoft.Authorization/roleAssignments@2022-04-01'={
-  name: clusterStorageRoleName
+resource storageRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01'={
+  name: guid(kv.id, msiId, keyVaultRole.id)
   scope: sa::fileServices::share
   properties:{
-    principalId: clusterMsiId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: fileShareRole.id
-  }
-}
-
-resource podIdentityStorageRoles 'Microsoft.Authorization/roleAssignments@2022-04-01'={
-  name: podIdentityStorageRoleName
-  scope: sa::fileServices::share
-  properties:{
-    principalId: podIdentityId
+    principalId: msiId
     principalType: 'ServicePrincipal'
     roleDefinitionId: fileShareRole.id
   }

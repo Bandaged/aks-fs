@@ -4,6 +4,8 @@ metadata:
   name: {{ include "test.fullname" . }}
   labels:
     {{- include "test.labels" . | nindent 4 }}
+  annotations:
+    azure.workload.identity/client-id: {{.Values.podIdentity.clientId | quote}}
 spec:
   type: {{ .Values.service.type }}
   ports:

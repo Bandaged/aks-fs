@@ -1,0 +1,9 @@
+{{- if not .Values.podIdentity.workloadIdentity }}
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentityBinding
+metadata:
+  name:  {{cat .Values.podIdentity.name "-binding" | replace " "  "" | quote}}
+spec:
+  azureIdentity: {{.Values.podIdentity.name | quote}}
+  selector: {{.Values.podIdentity.selector | quote}}
+{{-end }}

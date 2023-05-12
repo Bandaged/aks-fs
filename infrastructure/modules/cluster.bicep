@@ -20,6 +20,7 @@ param agentCount int = 3
 param agentVMSize string = 'standard_d2s_v3'
 
 param deploy bool = true
+param useWorkloadIdentity bool = false
 
 resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = if(deploy) {
   name: clusterName
@@ -30,7 +31,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = i
   properties:{
     dnsPrefix: dnsPrefix
     podIdentityProfile:{
-      enabled: true
+      enabled: !useWorkloadIdentity
       userAssignedIdentities: podIdentities
     }
     agentPoolProfiles: [
@@ -43,6 +44,11 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = i
         mode: 'System'
       }
     ]
+    securityProfile:{
+      workloadIdentity: {
+        enabled: useWorkloadIdentity
+      }
+    }
     storageProfile:{
       blobCSIDriver:{
         enabled: true

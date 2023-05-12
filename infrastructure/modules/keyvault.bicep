@@ -4,6 +4,8 @@ param location string = resourceGroup().location
 param tenantId string = tenant().tenantId
 param skuName string = 'standard'
 param skufamily string = 'A'
+param enableSoftDelete bool = false
+param softDeleteRetentionInDays int = 0
 param deploy bool =true
 param properties object ={
   enableSoftDelete: false
@@ -14,8 +16,8 @@ resource kv 'Microsoft.KeyVault/vaults@2023-02-01' = if(deploy){
   name: kvName
   location: location
   properties:{
-    enableSoftDelete: properties.enableSoftDelete
-    softDeleteRetentionInDays: properties.softDeleteRetentionInDays
+    enableSoftDelete: enableSoftDelete
+    softDeleteRetentionInDays: softDeleteRetentionInDays
     sku: {
       family: skufamily
       name: skuName

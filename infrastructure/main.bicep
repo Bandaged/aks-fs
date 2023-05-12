@@ -7,8 +7,9 @@ param tenantId string = tenant().tenantId
 param podIdentityNamespace string ='default'
 param podIdentityName string ='default'
 param podIdentitySelector string = 'default'
+param deployCluster bool =true
 
-module podIdentity 'modules/podIdentity.bicep' ={
+module podIdentity 'modules/identity.bicep' ={
   name: 'identity'
   params:{
     msiName: podIdentityMsiName
@@ -16,7 +17,7 @@ module podIdentity 'modules/podIdentity.bicep' ={
   }
 }
 
-module cluster 'modules/cluster.bicep' ={
+module cluster 'modules/cluster.bicep' = if(deployCluster) {
   name: 'cluster'
   params:{
     clusterName: clusterName
@@ -69,35 +70,57 @@ module secrets 'modules/secret.bicep' ={
   ]
 }
 
-module rbac 'modules/rbac.bicep'={
-  name: 'rbac'
+module podIdRbac 'modules/rbac.bicep'={
+  name: 'pod-id-rbac'
   params:{
     kvName: vault.outputs.name
     saName: storage.outputs.saName
     shareName: storage.outputs.shareName
-    podIdentityId:podIdentity.outputs.resourceId
-    clusterMsiId: cluster.outputs.msiId
+    msiId:podIdentity.outputs.resourceId
   }
   dependsOn:[
     vault
     storage
     podIdentity
+  ]
+}
+
+module clusterRbac 'modules/rbac.bicep'= if(deployCluster){
+  name: 'cluster-rbac'
+  params:{
+    kvName: vault.outputs.name
+    saName: storage.outputs.saName
+    shareName: storage.outputs.shareName
+    msiId: cluster.outputs.msiId
+  }
+  dependsOn:[
+    vault
+    storage
     cluster
   ]
 }
 
-output fileshare object ={
-  shareName: storage.outputs.shareName
-  accountName: storage.outputs.saName
+
+output clusterId string = deployCluster ? cluster.outputs.aksName : ''
+output clusterMsiId string = deployCluster ? cluster.outputs.msiId : ''
+output clusterName string = deployCluster ? cluster.outputs.aksName : ''
+
+output helmValues object = {
   keyVault:{
     vaultName: vault.outputs.name
     tenantId: vault.outputs.tenantId
     accountName: secrets.outputs.accountNameSecretName
     accountKey: secrets.outputs.accountKeySecretName
   }
-}
-
-output podIdentity object = {
-  id: podIdentity.outputs.resourceId
-  name: podIdentity.outputs.name
+  fileshare:{
+    shareName: storage.outputs.shareName
+    accountName: storage.outputs.saName
+  }
+  podIdentity:{
+    resourceId: podIdentity.outputs.resourceId
+    objectId: podIdentity.outputs.objectId
+    clientId: podIdentity.outputs.clientId
+    tenantId: podIdentity.outputs.tenantId
+    name: podIdentity.outputs.name
+  }
 }
