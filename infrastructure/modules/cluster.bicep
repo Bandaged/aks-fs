@@ -1,6 +1,8 @@
 
 param clusterName string
 param location string = resourceGroup().location
+param msiName string
+// param kubeletMsiName string
 
 @description('Optional DNS prefix to use with hosted Kubernetes API server FQDN.')
 param dnsPrefix string ='aks'
@@ -22,16 +24,37 @@ param deploy bool = true
 param useWorkloadIdentity bool = false
 param usePodIdentity bool = true
 
+resource msi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing ={
+  name: msiName
+}
+// resource kubeletMsi 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' existing ={
+//   name: kubeletMsiName
+// }
+
+
 resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = if(deploy) {
   name: clusterName
   location: location
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities:{
+      '${msi.id}': {}
+    }
   }
   properties:{
     dnsPrefix: dnsPrefix
     podIdentityProfile:{
       enabled: usePodIdentity
+    }
+    addonProfiles:{
+      azureKeyvaultSecretsProvider: {
+        enabled: true
+        config:{
+          enableSecretRotation: 'true'
+          syncSecrets: 'true'
+          syncFrequency: '30m'
+        }
+      }
     }
     networkProfile:{
       networkPlugin:'azure'
@@ -72,8 +95,6 @@ resource existingCluster 'Microsoft.ContainerService/managedClusters@2022-05-02-
 
 output aksName string = deploy ? aks.name : existingCluster.name
 output aksId string = deploy ? aks.id : existingCluster.id
-output msiTenantId string = deploy ? aks.identity.tenantId : existingCluster.identity.tenantId
-output msiId string = deploy ? aks.identity.principalId : existingCluster.identity.principalId
 output kubeletMsiObjectId string = deploy ? aks.properties.identityProfile.kubeletIdentity.objectId : existingCluster.properties.identityProfile.kubeletIdentity.objectId
 output kubeletMsiClientId string = deploy ? aks.properties.identityProfile.kubeletIdentity.clientId : existingCluster.properties.identityProfile.kubeletIdentity.clientId
 output kubeletMsiResourceId string = deploy ? aks.properties.identityProfile.kubeletIdentity.resourceId : existingCluster.properties.identityProfile.kubeletIdentity.resourceId

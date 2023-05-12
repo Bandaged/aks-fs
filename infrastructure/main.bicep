@@ -2,6 +2,7 @@ param saName string
 param kvName string
 param clusterName string
 param podIdentityMsiName string
+param clusterMsiName string
 param location string = resourceGroup().location
 param tenantId string = tenant().tenantId
 param deployCluster bool =true
@@ -12,8 +13,17 @@ param deployUserRbac bool = true
 param currentUserId string = ''
 param currentUserPrincipalType string = 'User'
 
-module podIdentity 'modules/identity.bicep' ={
-  name: 'identity'
+module clusterMsi 'modules/identity.bicep' ={
+  name: 'cluster-id'
+  params:{
+    msiName: clusterMsiName
+    location: location
+    deploy: deployIdentity
+  }
+}
+
+module podMsi 'modules/identity.bicep' ={
+  name: 'pod-id'
   params:{
     msiName: podIdentityMsiName
     location: location
@@ -26,9 +36,10 @@ module cluster 'modules/cluster.bicep' = if(deployCluster) {
   params:{
     clusterName: clusterName
     location: location
+    msiName: clusterMsi.outputs.name
   }
   dependsOn:[
-    podIdentity
+    clusterMsi
   ]
 }
 
@@ -70,27 +81,27 @@ module podIdRbac 'modules/rbac.bicep'={
     kvName: vault.outputs.name
     saName: storage.outputs.saName
     shareName: storage.outputs.shareName
-    msiId: podIdentity.outputs.objectId
+    msiId: podMsi.outputs.objectId
   }
   dependsOn:[
     vault
     storage
-    podIdentity
+    podMsi
   ]
 }
 
-module clusterRbac 'modules/rbac.bicep'= if(deployCluster){
+module clusterMsiRbac 'modules/rbac.bicep'= if(deployCluster){
   name: 'cluster-rbac'
   params:{
     kvName: vault.outputs.name
     saName: storage.outputs.saName
     shareName: storage.outputs.shareName
-    msiId: cluster.outputs.msiId
+    msiId: clusterMsi.outputs.objectId
   }
   dependsOn:[
     vault
     storage
-    cluster
+    clusterMsi
   ]
 }
 module kubeletRbac 'modules/rbac.bicep'= if(deployCluster){
@@ -122,16 +133,16 @@ output cluster object ={
   name: cluster.outputs.aksName
   identities:{
     controlPlane: {
-      id: cluster.outputs.msiId
+      clientId: clusterMsi.outputs.clientId
+      objectId: clusterMsi.outputs.objectId
+      tenantId: clusterMsi.outputs.tenantId
     }
     kubelet:{
-      id: cluster.outputs.kubeletMsiObjectId
+      clientId: cluster.outputs.kubeletMsiClientId
+      objectId: cluster.outputs.kubeletMsiObjectId
     }
   }
 }
-output clusterId string = deployCluster ? cluster.outputs.aksName : ''
-output clusterMsiId string = deployCluster ? cluster.outputs.msiId : ''
-output clusterName string = deployCluster ? cluster.outputs.aksName : ''
 
 output helmValues object = {
   keyVault:{
@@ -144,11 +155,23 @@ output helmValues object = {
     shareName: storage.outputs.shareName
     accountName: storage.outputs.saName
   }
+  clusterIdentity: {
+    resourceId: clusterMsi.outputs.resourceId
+    objectId: clusterMsi.outputs.objectId
+    clientId: clusterMsi.outputs.clientId
+    tenantId: clusterMsi.outputs.tenantId
+    name: clusterMsi.outputs.name
+  }
+  kubeletIdentity: {
+    resourceId: cluster.outputs.kubeletMsiResourceId
+    objectId: cluster.outputs.kubeletMsiObjectId
+    clientId: cluster.outputs.kubeletMsiClientId
+  }
   podIdentity:{
-    resourceId: podIdentity.outputs.resourceId
-    objectId: podIdentity.outputs.objectId
-    clientId: podIdentity.outputs.clientId
-    tenantId: podIdentity.outputs.tenantId
-    name: podIdentity.outputs.name
+    resourceId: podMsi.outputs.resourceId
+    objectId: podMsi.outputs.objectId
+    clientId: podMsi.outputs.clientId
+    tenantId: podMsi.outputs.tenantId
+    name: podMsi.outputs.name
   }
 }

@@ -12,7 +12,10 @@
       "value": "testaksaddis001"
     },
     "podIdentityMsiName": {
-      "value": "testmsiaddis001"
+      "value": "testpodmsiaddis001"
+    },
+    "clusterMsiName": {
+      "value": "testaksmsiaddis001"
     }
   }
 }

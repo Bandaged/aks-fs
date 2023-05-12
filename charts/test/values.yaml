@@ -47,6 +47,20 @@ podIdentity:
   tenantId: ""
   workloadIdentity: false
 
+kubeletIdentity:
+  name: ""
+  resourceId: ""
+  objectId: ""
+  clientId: ""
+  tenantId: ""
+
+clusterIdentity:
+  name: ""
+  resourceId: ""
+  objectId: ""
+  clientId: ""
+  tenantId: ""
+
 podAnnotations: {}
 
 podSecurityContext: {}
