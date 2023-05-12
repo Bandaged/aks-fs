@@ -6,4 +6,4 @@ metadata:
 spec:
   azureIdentity: {{.Values.podIdentity.name | quote}}
   selector: {{.Values.podIdentity.selector | quote}}
-{{-end }}
+{{- end }}

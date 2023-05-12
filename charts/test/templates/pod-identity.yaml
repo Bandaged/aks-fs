@@ -7,4 +7,4 @@ spec:
   type: 0
   resourceID: {{.Values.podIdentity.resourceId}}
   clientID: {{.Values.podIdentity.clientId}}
-{{-end}}
+{{- end }}

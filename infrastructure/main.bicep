@@ -93,6 +93,20 @@ module clusterRbac 'modules/rbac.bicep'= if(deployCluster){
     cluster
   ]
 }
+module kubeletRbac 'modules/rbac.bicep'= if(deployCluster){
+  name: 'kubelet-rbac'
+  params:{
+    kvName: vault.outputs.name
+    saName: storage.outputs.saName
+    shareName: storage.outputs.shareName
+    msiId: cluster.outputs.kubeletMsiObjectId
+  }
+  dependsOn:[
+    vault
+    storage
+    cluster
+  ]
+}
 
 module currentUserRbac 'modules/rbac.bicep' = if(length(currentUserId) > 0 && deployUserRbac){
   name: 'user-rbac'
@@ -104,7 +118,17 @@ module currentUserRbac 'modules/rbac.bicep' = if(length(currentUserId) > 0 && de
     principalType: currentUserPrincipalType
   }
 }
-
+output cluster object ={
+  name: cluster.outputs.aksName
+  identities:{
+    controlPlane: {
+      id: cluster.outputs.msiId
+    }
+    kubelet:{
+      id: cluster.outputs.kubeletMsiObjectId
+    }
+  }
+}
 output clusterId string = deployCluster ? cluster.outputs.aksName : ''
 output clusterMsiId string = deployCluster ? cluster.outputs.msiId : ''
 output clusterName string = deployCluster ? cluster.outputs.aksName : ''

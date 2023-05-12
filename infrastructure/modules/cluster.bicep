@@ -20,6 +20,7 @@ param agentVMSize string = 'standard_d2s_v3'
 
 param deploy bool = true
 param useWorkloadIdentity bool = false
+param usePodIdentity bool = true
 
 resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = if(deploy) {
   name: clusterName
@@ -30,11 +31,12 @@ resource aks 'Microsoft.ContainerService/managedClusters@2022-05-02-preview' = i
   properties:{
     dnsPrefix: dnsPrefix
     podIdentityProfile:{
-      enabled: !useWorkloadIdentity
+      enabled: usePodIdentity
     }
     networkProfile:{
       networkPlugin:'azure'
     }
+    publicNetworkAccess: 'Enabled'
     agentPoolProfiles: [
       {
         name: 'agentpool'
@@ -72,3 +74,6 @@ output aksName string = deploy ? aks.name : existingCluster.name
 output aksId string = deploy ? aks.id : existingCluster.id
 output msiTenantId string = deploy ? aks.identity.tenantId : existingCluster.identity.tenantId
 output msiId string = deploy ? aks.identity.principalId : existingCluster.identity.principalId
+output kubeletMsiObjectId string = deploy ? aks.properties.identityProfile.kubeletIdentity.objectId : existingCluster.properties.identityProfile.kubeletIdentity.objectId
+output kubeletMsiClientId string = deploy ? aks.properties.identityProfile.kubeletIdentity.clientId : existingCluster.properties.identityProfile.kubeletIdentity.clientId
+output kubeletMsiResourceId string = deploy ? aks.properties.identityProfile.kubeletIdentity.resourceId : existingCluster.properties.identityProfile.kubeletIdentity.resourceId

@@ -9,7 +9,6 @@ minikube start \
 --extra-config=apiserver.Authorization.Mode=RBAC
 
 # add secret store csi
-helm repo add secrets-store-csi-driver https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts
 helm install csi-secrets-store secrets-store-csi-driver/secrets-store-csi-driver --namespace kube-system
 
 # add file csi driver
