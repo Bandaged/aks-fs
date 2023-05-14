@@ -1,0 +1,58 @@
+{{- if .Values.podIdentity.enabled }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  {{ cat (include "test.fullname" .) "-pod-id-example" | replace " " "" | quote }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      test: example-pod-id
+      aadpodidbinding: {{ .Values.podIdentity.selector | quote }}
+  template:
+    metadata:
+      labels:
+        test: example-pod-id
+        aadpodidbinding: {{ .Values.podIdentity.selector | quote }}
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "test.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name:  {{ cat (include "test.fullname" .) "-pod-id-example" | replace " " "" | quote }}
+          image: mcr.microsoft.com/oss/azure/aad-pod-identity/demo:v1.6.3
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+          {{- end }}
+          args:
+            - --subscriptionid=$SUBSCRIPTION_ID
+            - --clientid=$IDENTITY_CLIENT_ID
+            - --resourcegroup=$IDENTITY_RESOURCE_GROUP
+          env:
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+{{- end}}

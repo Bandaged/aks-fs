@@ -60,3 +60,74 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{- define "app-template.sharedspec" }}
+
+{{- with .Values.imagePullSecrets }}
+imagePullSecrets:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+serviceAccountName: {{ include "test.serviceAccountName" . }}
+securityContext:
+{{- toYaml .Values.podSecurityContext | nindent 2 }}
+{{- with .Values.nodeSelector }}
+nodeSelector:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with .Values.affinity }}
+affinity:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- with .Values.tolerations }}
+tolerations:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+containers:
+- name: {{ $.Chart.Name }}
+  securityContext:
+  {{- toYaml $.Values.securityContext | nindent 6 }}
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+  imagePullPolicy: {{ $.Values.image.pullPolicy }}
+  ports:
+    - name: http
+      containerPort: 80
+      protocol: TCP
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+  resources:
+  {{- toYaml $.Values.resources | nindent 6 }}
+{{- end }}
+
+{{- define "app-template.inline-file-csi-volume"}}
+- name: inline-share
+  csi:
+    driver: file.csi.azure.com
+    readOnly: {{ .readonly | default "false" | quote }}
+    volumeAttributes:
+      shareName:  {{ .shareName | quote }}
+      protocol: {{ .protocol | default "smb" | quote }}
+      {{- if .subscriptionId }}
+      subscriptionId: {{ .subscriptionId | quote }}
+      {{- end }}
+      {{- if .resourceGroup }}
+      resourceGroup: {{ .resourceGroup | quote }}
+      {{- end }}
+      {{- if .accountName }}
+      storageAccount: {{ .accountName | quote }}
+      {{- end }}
+      {{- if .folderName }}
+      folderName: {{ .folderName | quote }}
+      {{- end }}
+      {{- if .server }}
+      server: {{ .server | quote }}
+      {{- end }}
+      {{ if eq .protocol "nfs" }}
+      mountOptions: {{ .mountOptions | default "dir_mode=0777,file_mode=0777,cache=strict,actimeo=30,nosharesock" | quote }}
+      {{- end }}
+{{- end }}

@@ -1,0 +1,3 @@
+{{- if .Values.vanilla.enabled }}
+
+{{- end }}

@@ -13,4 +13,28 @@ podIdentity:
   clientId: test
   selector: test
   tenantId: test
-  workloadIdentity: false
+  enabled: true
+
+workloadIdentity:
+  name: testuser
+  resourceId: test
+  clientId: test
+  selector: test
+  tenantId: test
+  enabled: true
+
+spnIdentity:
+  name: testuser
+  resourceId: test
+  clientId: test
+  selector: test
+  tenantId: test
+  enabled: true
+ 
+vmIdentity:
+  name: testuser
+  resourceId: test
+  clientId: test
+  selector: test
+  tenantId: test
+  enabled: true

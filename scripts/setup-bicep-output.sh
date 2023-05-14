@@ -12,7 +12,9 @@ vaultName=$(cat ../build/values.bicep.json | jq .keyVault.vaultName | tr -d '"')
 secretName=$(cat ../build/values.bicep.json | jq .keyVault.accountKey | tr -d '"')
 clusterName=$(az deployment group show -g ${rgName} -n ${deploymentName} --query properties.outputs.cluster.value.name | tr -d '"')
 cat <<EOF > ../build/secrets.bicep.yaml
-fileshare:
+vanilla:
    accountKey: $(az keyvault secret show -n=${secretName} --vault-name=${vaultName} | jq .value)
+   enabled: true
+   create: true
 EOF
 az aks get-credentials -g ${rgName} -n ${clusterName} -f ../build/aks.kubeconfig  || exit 1

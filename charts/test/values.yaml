@@ -30,14 +30,13 @@ keyVault:
   tenantId: ""
   
 fileshare:
-  podIdenityName: ""
+  readonly: false
   shareName: ""
-  accountKey: ""
   accountName: ""
-  vanillaSecretName: fileshare-auth-vanilla
-  vmSecretName: fileshare-auth-vm
-  podIdSecretName: fileshare-auth-pod-id
-
+  protocol: "smb"
+  resourceGroup: ""
+  subscriptionId: ""
+  
 podIdentity:
   selector: ""
   name: ""
@@ -45,21 +44,49 @@ podIdentity:
   objectId: ""
   clientId: ""
   tenantId: ""
-  workloadIdentity: false
+  enabled: false
+  secretName: "fileshare-auth-pod-id"
+  claimName: "pvc-fileshare-auth-pod-id"
+  volumeName: "pv-fileshare-auth-pod-id"
 
-kubeletIdentity:
-  name: ""
+spnIdentity:
   resourceId: ""
   objectId: ""
   clientId: ""
   tenantId: ""
+  enabled: false
+  secretName: "fileshare-auth-spn"
+  claimName: "pvc-fileshare-auth-spn"
+  volumeName: "pv-fileshare-auth-spn"
 
-clusterIdentity:
-  name: ""
+vmIdentity:
   resourceId: ""
   objectId: ""
   clientId: ""
   tenantId: ""
+  enabled: false
+  secretName: "fileshare-auth-vm-id"
+  claimName: "pvc-fileshare-auth-vm-id"
+  volumeName: "pv-fileshare-auth-vm-id"
+
+workloadIdentity:
+  resourceId: ""
+  objectId: ""
+  clientId: ""
+  tenantId: ""
+  enabled: false
+  secretName: "fileshare-auth-workload-id"
+  claimName: "pvc-fileshare-auth-workload-id"
+  volumeName: "pv-fileshare-auth-workload-id"
+
+vanilla:
+  accountName: ""
+  accountKey: ""
+  enabled: true
+  secretName: "fileshare-auth-vanilla"
+  claimName: "pvc-fileshare-auth-vanilla"
+  volumeName: "pv-fileshare-auth-vanilla"
+  create: false
 
 podAnnotations: {}
 
